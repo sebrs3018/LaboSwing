@@ -1,17 +1,13 @@
-import SwingWorkerUtils.DebugWorker;
-import SwingWorkerUtils.PausableSwingWorker;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 
-public class UI extends JFrame {
+public class UIDebugger extends JFrame {
 
     private JTextArea editText;
     private JButton nextButton;
 
 
-    public UI(){
+    public UIDebugger(){
         super("Lil debugger");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -24,18 +20,20 @@ public class UI extends JFrame {
         editText = new JTextArea(5,10);
         editText.setEditable(true);
 
+        JScrollPane scrollPane = new JScrollPane(editText);
+
         centerPanel.add(nextButton);
-        centerPanel.add(editText);
+        centerPanel.add(scrollPane);
 
         nextButton.setActionCommand("debug");
-        nextButton.addActionListener(new DebugListener(editText, nextButton, this));
+        nextButton.addActionListener(new DebugListener(editText, nextButton));
 
         getContentPane().add(centerPanel, BorderLayout.CENTER);
         pack();
+
         setLocationRelativeTo(null);
         setVisible(true);
 
-//        initApplication();
     }
 
     private void aggiornaRisultato(String risultato) {

@@ -7,33 +7,29 @@ import java.awt.event.ActionListener;
 
 public class DebugListener implements ActionListener {
 
+    private final PausableSwingWorker debugWorker;
     private JButton nextButton;
-    private JTextArea textArea;
-    private PausableSwingWorker debugWorker;
-    private UI ui;
 
-    public DebugListener(JTextArea _textArea, JButton _nextButton,UI _ui){
-        textArea = _textArea;
+    public DebugListener(JTextArea _textArea, JButton _nextButton){
         nextButton = _nextButton;
-        ui = _ui;
-        debugWorker = new DebugWorker(textArea, nextButton);
+        /* Passo al DebugWorker gli oggetti su cui eseguirà delle modifiche... nel Done() oppure nella process! */
+        debugWorker = new DebugWorker(_textArea, _nextButton);
+        /* Faccio partire subito il workerThread in stato "pause"*/
         debugWorker.execute();
     }
 
     @Override   //Questa action verrà eseguita dall'EDT
     public void actionPerformed(ActionEvent e) {
-        if(e.getActionCommand() == "debug"){
+        if(e.getActionCommand().equals("debug")){
             calculateNextStep();
         }
     }
 
     private void calculateNextStep() {
+        /* Disabilito il pulsante finchè non completo un passo della mia computazione */
+        nextButton.setEnabled(false);
+        /* Questa funzione mi permette di riattivare il mio swingWorker - Viene chiamato ogni volta che schiaccio il pulsante*/
         debugWorker.resume();
-
-/*        MonitorDebugger monitorDebugger = new MonitorDebugger(nextButton, debugWorker);
-        debugWorker.addPropertyChangeListener(monitorDebugger);*/
-//        System.out.println(debugWorker.getState());
-
     }
 
 }

@@ -1,85 +1,58 @@
 package SwingWorkerUtils;
 
 import javax.swing.*;
-import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 public class DebugWorker extends PausableSwingWorker<Integer, Integer> {
 
-    private JTextArea textArea;
-    private final JButton nextButton;
+    private JTextArea   textArea;
+    private JButton     nextButton;
     private int step = 0;
+    private static final int NROROUNDS = 10;
 
     //Il risultato della computazione i-esima sarà pubblicato nella textArea corrispondente
     public DebugWorker(JTextArea _textArea, JButton _nextButton){
-        textArea = _textArea;
-        nextButton = _nextButton;
+        textArea    = _textArea;
+        nextButton  = _nextButton;
+        /* Al momento della creazione dello swingWorker mi sincronizzo col pulsante "next" */
         this.pause();
-//        ui = _ui;
     }
 
     @Override //Worker thread body
     protected Integer doInBackground() throws Exception {
 
-//        while(!isCancelled()){
-            while (step<3){
+            while (step<NROROUNDS){
+                /* Finche rimane in pausa, il mio thread non andrà avanti nella computazione... BUSY WAIT! */
                 if(!isPaused()){
+                    /* Simulo computazione pesante */
+                    Thread.sleep(1000);
                     step++;
-                    //Una volta completato un passo dell'iterazione, pubblico il risultato
+                    /* Una volta completato un passo dell'iterazione, pubblico il risultato */
                     publish(step);
-                    /* E' necessario chiamare la sleep perchè i risultati siano recuperati dalla process*/
-                    Thread.sleep(100);
-                }else{
-                    Thread.sleep(200);
+                    /* Appena completato l'i-esimo passo, aspetto... */
+                    this.pause();
+                }
             }
-        }
         return null;
     }
 
 
-    @Override
+    @Override //eseguito nell'EDT... Dunque posso riattivare il pulsante qua!
     protected void process(List<Integer> chunks) {
-
-        System.out.println("chunk size: " + chunks.size());
-
             for( var elem : chunks){
-
             if(isCancelled())
                 break;
 
                 textArea.append("Passo " + step + ": " + elem + "\n");
-                this.pause();
-
+                nextButton.setEnabled(true);
             }
         }
-
-
 
     @Override
     protected void done() {
         super.done();
-        System.out.println("Debugging finito!");
         textArea.append("Debug Finished");
+        nextButton.setText("Finished");
+        nextButton.setEnabled(false);
     }
-
-
-
-    /**
-     * Wait the given time in milliseconds
-
-     */
-    private void waitForReactivation () {
-        try {
-            Thread.sleep(1000);
-        }
-        catch (Exception ex) {
-            System.err.println(ex);
-        }
-    } // End of Method: waitFor()
-
-    public void goAhead(){
-        notify();
-    }
-
 }
